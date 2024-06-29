@@ -37,7 +37,9 @@ const customResponseMethods = (
   };
 
   res.unauthorized = (message?: string) => {
-    return res.status(401).json({ error: message });
+    return res
+      .status(401)
+      .json({ error: message || "نام کاربری / ایمیل یا رمز عبور اشتباه است." });
   };
 
   res.forbidden = (message?: string) => {

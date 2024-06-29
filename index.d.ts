@@ -1,20 +1,10 @@
 // types.d.ts
-import { IUser } from "src/app/models/user/User";
-
-interface UserWithId extends IUser {
-  id: number;
-}
-
-declare module "socket.io" {
-  interface Socket {
-    user?: { id: number; wallet?: { trial: number; main: number } };
-  }
-}
+import { IUser, TUserDoc } from "src/app/models/user/User";
 
 declare global {
   namespace Express {
     interface Request {
-      user: UserWithId;
+      user: TUserDoc;
     }
     interface Response {
       success: (data?: any) => Response;

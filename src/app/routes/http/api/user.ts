@@ -1,5 +1,7 @@
+import UserAuthController from "@controllers/user/UserAuthController";
 import UserManagementController from "@controllers/user/UserManagementController";
 import express, { Application } from "express";
+import UserMiddleware from "src/app/middleware/UserMiddleware";
 
 export default function (app: Application) {
   const Router = express.Router();
@@ -11,9 +13,13 @@ export default function (app: Application) {
   Router.put("/users/:id", UserManagementController.update);
   Router.delete("/users/:id", UserManagementController.delete);
 
+  //auth routes
+  Router.post("/logout", UserAuthController.logout);
+  Router.post("/logout-all", UserAuthController.logoutAll);
+
   Router.all("/*", (req, res) => {
     return res.notFound();
   });
   // Apply Router
-  app.use("/api/user/", Router);
+  app.use("/api/user/", UserMiddleware, Router);
 }
