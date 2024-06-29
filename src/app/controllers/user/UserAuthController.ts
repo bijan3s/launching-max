@@ -26,39 +26,35 @@ class UserAuthController extends AbstractController {
 
   async signup(req: Request, res: Response) {
     try {
+      const { username, email, password, role } = req.body;
+
       const validator = new Validator(req);
+      await validator
+        .body("username")
+        .required()
+        .minLength(2)
+        .maxLength(32)
+        .custom(async (val) => {
+          const user = await User.findOne({ username: val });
+          if (user) return "unique";
+          else return true;
+        });
 
       await validator
         .body("email")
         .required()
         .email()
-        .custom(async (value: string) => {
-          const user = await User.findOne({ where: { email: value } });
-          if (user) {
-            return "unique";
-          } else return true;
+        .custom(async (val) => {
+          const user = await User.findOne({ email: val });
+          if (user) return "unique";
+          else return true;
         });
 
-      await validator
-        .body("username")
-        .required()
-        .string()
-        .minLength(4)
-        .stopOnFirstError()
-        .custom(async (value: string) => {
-          const user = await User.findOne({ where: { username: value } });
-          if (user) {
-            return "unique";
-          }
-          return false;
-        });
-
-      validator.body("password").required().minLength(8);
+      validator.body("password").required().minLength(8).maxLength(32);
 
       if (validator.hasErrors()) {
         return res.validationError(validator.errors());
       }
-      const { email, password, username, inviter_id } = req.body;
       authService.signup({ email, password, username }, res);
     } catch (error) {
       return res.internalError(`${error}`);

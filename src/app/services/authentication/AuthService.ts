@@ -55,11 +55,13 @@ export default class AuthService {
     },
     res: Response
   ) {
+    console.log(data);
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const user = await User.create({
       ...data,
       password: hashedPassword,
+      role: "user",
     });
 
     const token = CryptoJS.lib.WordArray.random(128 / 8).toString(
