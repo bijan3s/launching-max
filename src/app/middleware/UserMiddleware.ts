@@ -24,23 +24,25 @@ export default async function UserMiddleware(
     const token = headerAuthentication[1];
     const personalAccessTokens = await PersonalAccessToken.find({
       personId: userId,
+      token: token,
     });
 
     if (personalAccessTokens?.length === 0) {
       return res.unauthorized("unauthorized");
     }
 
-    for (const item of personalAccessTokens) {
-      const isCorrectToken = bcrypt.compareSync(token, item.token);
-      if (isCorrectToken) {
-        const user = await User.findById(userId);
+    const correctToken = personalAccessTokens.find((item) =>
+      bcrypt.compareSync(token, item.token)
+    );
 
-        if (!user) {
-          return res.unauthorized("unauthorized");
-        } else {
-          req.user = user;
-          return next();
-        }
+    if (correctToken) {
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.unauthorized("unauthorized");
+      } else {
+        req.user = user;
+        return next();
       }
     }
     return res.unauthorized("unauthorized");

@@ -17,20 +17,12 @@ export default class AuthService {
   async login(loginFactor: string, password: string, res: Response) {
     let person: any | null = null;
 
-    if (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(loginFactor)) {
-      if (this.personType === "user") {
-        person = await User.findOne({ email: loginFactor }).select("+password");
-      }
-    } else {
-      if (this.personType === "user") {
-        person = await User.findOne({ username: loginFactor }).select(
-          "+password"
-        );
-      }
-    }
+    person = await User.findOne({
+      $or: [{ email: loginFactor }, { username: loginFactor }],
+    }).select("+password");
 
     if (!person || !(await bcrypt.compare(password, person.password || ""))) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.unauthorized();
     }
 
     const token = CryptoJS.lib.WordArray.random(128 / 8).toString(
